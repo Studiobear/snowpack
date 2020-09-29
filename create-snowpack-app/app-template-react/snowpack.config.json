@@ -1,4 +1,8 @@
 {
   "extends": "@snowpack/app-scripts-react",
+  "install": ["@testing-library/react", "chai"],
+  "installOptions": {
+    "namedExports": ["chai"]
+  },
   "plugins": []
 }
