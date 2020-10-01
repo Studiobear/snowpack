@@ -24,6 +24,6 @@ jobs:
           yarn --ignore-engines
           yarn build
           # yarn test
-          npx jest test/dev/dev.test.ts
+          npx jest test/dev/dev.test.ts --detectOpenHandles
         env:
           CI: true
