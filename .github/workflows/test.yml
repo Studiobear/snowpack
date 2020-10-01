@@ -23,6 +23,7 @@ jobs:
         run: |
           yarn --ignore-engines
           yarn build
-          yarn test
+          # yarn test
+          npx jest test/dev/dev.test.ts
         env:
           CI: true
