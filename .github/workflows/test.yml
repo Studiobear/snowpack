@@ -24,6 +24,7 @@ jobs:
           yarn --ignore-engines
           yarn build
           # yarn test
-          npx jest test/dev/dev.test.ts --detectOpenHandles
         env:
           CI: true
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
