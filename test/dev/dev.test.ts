@@ -8,6 +8,8 @@ const got = require('got');
 
 describe('snowpack dev', () => {
   it('smoke', async () => {
+    expect.assertions(3);
+
     const cwd = path.join(__dirname, 'smoke');
 
     // start the server
@@ -43,5 +45,11 @@ describe('snowpack dev', () => {
 
     // all set
     snowpackProcess.cancel();
+
+    try {
+      await snowpackProcess;
+    } catch (error) {
+      expect(error.isCanceled).toEqual(true);
+    }
   });
 });
