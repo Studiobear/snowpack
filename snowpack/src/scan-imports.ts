@@ -149,48 +149,55 @@ function parseCssForInstallTargets(code: string): InstallTarget[] {
   return installTargets;
 }
 
+function parseFileType({type, baseExt, loc, contents}) {
+  if (/(CSS|HTML|JS$)/.test(type)) logger.debug(`Scanning ${loc} for imports as ${type}`)
+  if (type === 'CSS') return parseCssForInstallTargets(contents);
+  if (type === 'HTML') return parseJsForInstallTargets(extractJSFromHTML({contents, baseExt}));(contents);
+  if (type === 'JS') return parseJsForInstallTargets(contents);
+
+  logger.debug(
+    `Skip scanning ${loc} for imports (unknown file extension ${baseExt})`,
+  );
+  return [];
+}
+
 function parseFileForInstallTargets({
   locOnDisk,
   baseExt,
-  contents,
+  contents
 }: SnowpackSourceFile<string>): InstallTarget[] {
   const relativeLoc = path.relative(process.cwd(), locOnDisk);
 
+  const targetExtDefault = {
+    '.css': 'CSS',
+    '.less': 'CSS',
+    '.sass': 'CSS',
+    '.scss': 'CSS',
+    '.html': 'HTML',
+    '.svelte': 'HTML',
+    '.vue': 'HTML',
+    '.js': 'JS',
+    '.jsx': 'JS',
+    '.mjs': 'JS',
+    '.ts': 'JS',
+    '.tsx': 'JS'
+  };
+
+  const targetExt = {
+    ...targetExtDefault
+  };
+
   try {
-    switch (baseExt) {
-      case '.css':
-      case '.less':
-      case '.sass':
-      case '.scss': {
-        logger.debug(`Scanning ${relativeLoc} for imports as CSS`);
-        return parseCssForInstallTargets(contents);
-      }
-      case '.html':
-      case '.svelte':
-      case '.vue': {
-        logger.debug(`Scanning ${relativeLoc} for imports as HTML`);
-        return parseJsForInstallTargets(extractJSFromHTML({contents, baseExt}));
-      }
-      case '.js':
-      case '.jsx':
-      case '.mjs':
-      case '.ts':
-      case '.tsx': {
-        logger.debug(`Scanning ${relativeLoc} for imports as JS`);
-        return parseJsForInstallTargets(contents);
-      }
-      default: {
-        logger.debug(
-          `Skip scanning ${relativeLoc} for imports (unknown file extension ${baseExt})`,
-        );
-        return [];
-      }
+    if (targetExt[baseExt]) {
+      return parseFileType({type: targetExt[baseExt], loc: relativeLoc, baseExt, contents});
     }
   } catch (err) {
     // Another error! No hope left, just abort.
     logger.error(`! ${locOnDisk}`);
     throw err;
   }
+
+  return [];
 }
 
 /** Extract only JS within <script type="module"> tags (works for .svelte and .vue files, too) */
