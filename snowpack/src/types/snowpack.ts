@@ -60,6 +60,10 @@ export interface PluginOptimizeOptions {
   buildDirectory: string;
 }
 
+export interface PluginInstallExtension {
+  [key: string]: [string, string]
+}
+
 export interface SnowpackPlugin {
   /** name of the plugin */
   name: string;
@@ -74,6 +78,11 @@ export interface SnowpackPlugin {
        file extensions that this load function outputs (e.g. [".js", ".css"])
      */
     output: string[];
+    /**
+      install file extensions that this load function takes as input (e.g. {".md":["HTML",
+       "SVELTE_VUE_REGEX"]})
+     */
+    install?: PluginInstallExtension | string[]
   };
   /** load a file that matches resolve.input */
   load?(options: PluginLoadOptions): Promise<PluginLoadResult | string | null | undefined | void>;

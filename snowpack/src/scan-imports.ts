@@ -164,10 +164,12 @@ function parseFileType({type, baseExt, loc, contents}) {
 function parseFileForInstallTargets({
   locOnDisk,
   baseExt,
-  contents
+  contents,
+  ...props
 }: SnowpackSourceFile<string>): InstallTarget[] {
   const relativeLoc = path.relative(process.cwd(), locOnDisk);
-
+  logger.debug(`parseFileForInstallTargets: ${baseExt}, ${props}`);
+  console.log(props)
   const targetExtDefault = {
     '.css': 'CSS',
     '.less': 'CSS',

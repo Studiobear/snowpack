@@ -5,27 +5,29 @@ const path = require('path');
 
 const snowpackConfigDefault = {
   installOptions: { rollup: { plugins: [] }},
-  buildOptions:{},
+  buildOptions: {},
 }
 
 module.exports = function plugin(snowpackConfig = snowpackConfigDefault, pluginOptions = {}) {
   const isDev = process.env.NODE_ENV !== 'production';
-  let svelteOptions;
-  let preprocessOptions;
-  let installExtensions;
+  let svelteOptions = {};
+  let preprocessOptions = [];
   let extensions = [];
+  let configDir = pluginOptions.configDir || '.';
+  let install;
 
-  const userSvelteConfigLoc = path.join(process.cwd(), 'svelte.config.js');
+  const userSvelteConfigLoc = path.resolve(process.cwd(),`${configDir}/svelte.config.js`);
+  
   if (fs.existsSync(userSvelteConfigLoc)) {
     const userSvelteConfig = require(userSvelteConfigLoc);
-    const {preprocess, install, ..._svelteOptions} = userSvelteConfig;
-    preprocessOptions = preprocess;
-    installExtensions = install;
-    svelteOptions = _svelteOptions;
+    const { preprocess = [], ..._svelteOptions } = userSvelteConfig;
+    preprocessOptions = preprocess
+    svelteOptions = _svelteOptions
   }
 
-  if (installExtensions) {
-    console.log('pluginOptions: ', pluginOptions.install)
+  if (pluginOptions.install) {
+    install = pluginOptions.install
+    extensions = Object.keys(install)
   }
 
   if (snowpackConfig.installOptions && snowpackConfig.installOptions.rollup && snowpackConfig.installOptions.rollup.plugins){
@@ -44,8 +46,7 @@ module.exports = function plugin(snowpackConfig = snowpackConfigDefault, pluginO
   svelteOptions = {
     dev: isDev,
     css: false,
-    ...svelteOptions,
-    ...pluginOptions,
+    ...svelteOptions
   };
 
   return {
@@ -53,7 +54,7 @@ module.exports = function plugin(snowpackConfig = snowpackConfigDefault, pluginO
     resolve: {
       input: ['.svelte', ...extensions],
       output: ['.js', '.css'],
-      install: installExtensions
+      install
     },
     knownEntrypoints: ['svelte/internal'],
     async load({filePath, isSSR}) {
@@ -74,14 +75,15 @@ module.exports = function plugin(snowpackConfig = snowpackConfigDefault, pluginO
         ssrOptions.css = true;
       }
 
-      const {js, css} = svelte.compile(codeToCompile, {
+      const {js, css} = await svelte.compile(codeToCompile, {
         ...svelteOptions,
         ...ssrOptions,
         outputFilename: filePath,
         filename: filePath,
       });
 
-      const {sourceMaps} = snowpackConfig.buildOptions;
+      const sourceMaps = snowpackConfig.buildOptions && snowpackConfig.buildOptions.sourceMaps 
+
       const output = {
         '.js': {
           code: js.code,
