@@ -11,13 +11,17 @@ let makeHot = (...args) => {
 
 module.exports = function plugin(snowpackConfig, {hot: hotOptions, ...sveltePluginOptions} = {}) {
   const isDev = process.env.NODE_ENV !== 'production';
+  let {
+    configFilePath = 'svelte.config.js',
+    rollupOptions = {},
+    ...svelteOptions
+  } = sveltePluginOptions || {};
 
   // Support importing Svelte files when you install dependencies.
   snowpackConfig.installOptions.rollup.plugins.push(
-    svelteRollupPlugin({include: '**/node_modules/**', dev: isDev}),
+    svelteRollupPlugin({include: '**/node_modules/**', dev: isDev, ...rollupOptions}),
   );
 
-  let {configFilePath = 'svelte.config.js', ...svelteOptions} = sveltePluginOptions || {};
   let userSvelteOptions;
   let preprocessOptions;
 

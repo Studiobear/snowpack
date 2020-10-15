@@ -20,7 +20,10 @@ describe('@snowpack/plugin-svelte (mocked)', () => {
       generate: 'ssr',
       isDev: false,
     };
-    const optionsConfig = {configFilePath: './plugins/plugin-svelte/test/svelte.config.js'};
+    const optionsConfig = {
+      rollupOptions: {extensions: ['svelte']}, 
+      configFilePath: './plugins/plugin-svelte/test/svelte.config.js'
+    };
 
     const sveltePlugin = plugin(mockConfig, {...options, ...optionsConfig});
     await sveltePlugin.load({filePath: mockComponent});
